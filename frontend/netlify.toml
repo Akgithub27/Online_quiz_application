@@ -1,0 +1,28 @@
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200
+
+[[headers]]
+[headers.rules]
+for = "/*"
+[headers.rules.values]
+Cache-Control = "public, max-age=3600"
+X-Content-Type-Options = "nosniff"
+X-Frame-Options = "SAMEORIGIN"
+X-XSS-Protection = "1; mode=block"
+
+[build]
+command = "npm run build"
+publish = "dist"
+
+[build.environment]
+NODE_VERSION = "18"
+
+[[env.production]]
+[env.production.build]
+command = "npm run build"
+
+[[env.preview]]
+[env.preview.build]
+command = "npm run preview"

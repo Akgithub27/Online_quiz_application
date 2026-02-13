@@ -1,0 +1,38 @@
+# Backend
+target/
+.classpath
+.project
+.settings/
+.vscode/
+*.class
+*.jar
+*.war
+.DS_Store
+.idea/
+*.iml
+
+# Frontend
+node_modules/
+dist/
+.env
+.env.local
+.env.*.local
+*.log
+.vite/
+.eslintcache
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Build
+build/
+out/
+*.o

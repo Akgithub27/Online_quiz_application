@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  # MySQL Database (if running locally)
+  mysql:
+    image: mysql:8.0
+    container_name: quiz_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: quiz_db
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - quiz_network
+
+  # Backend Spring Boot Application
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: quiz_backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/quiz_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root_password
+      JWT_SECRET: your_super_secret_jwt_key_min_32_chars_long
+      JWT_EXPIRATION: 86400000
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+    networks:
+      - quiz_network
+    volumes:
+      - ./backend/target:/app/target
+
+  # Frontend React Application
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: quiz_frontend
+    environment:
+      VITE_API_BASE_URL: http://localhost:8080/api
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    networks:
+      - quiz_network
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+
+volumes:
+  mysql_data:
+
+networks:
+  quiz_network:
+    driver: bridge
