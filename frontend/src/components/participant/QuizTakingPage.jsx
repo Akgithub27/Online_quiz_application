@@ -58,6 +58,13 @@ export const QuizTakingPage = () => {
     setIsSubmitting(true);
 
     try {
+      // Validate that all questions are answered
+      if (Object.keys(selectedAnswers).length < quiz.questions.length) {
+        toast.error('Please answer all questions before submitting');
+        setIsSubmitting(false);
+        return;
+      }
+
       const response = await quizAttemptService.submitQuiz({
         quizId,
         selectedAnswers,
@@ -67,7 +74,9 @@ export const QuizTakingPage = () => {
       toast.success('Quiz submitted successfully!');
       navigate(`/participant/results/${response.data.id}`);
     } catch (error) {
-      toast.error('Failed to submit quiz');
+      console.error('Quiz submission error:', error);
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to submit quiz';
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

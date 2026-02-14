@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 
 @Data
@@ -37,9 +38,18 @@ public class QuizAttemptResponse {
         response.setTimeSpent(attempt.getTimeSpent());
         response.setSubmittedAt(attempt.getSubmittedAt());
 
-        // Parse selected answers JSON
+        // Parse selected answers JSON and convert Double values to Integer
         Gson gson = new Gson();
-        response.setSelectedAnswers(gson.fromJson(attempt.getSelectedAnswers(), Map.class));
+        Map<?, ?> rawMap = gson.fromJson(attempt.getSelectedAnswers(), Map.class);
+        Map<String, Integer> convertedMap = new java.util.HashMap<>();
+        if (rawMap != null) {
+            for (Map.Entry<?, ?> entry : rawMap.entrySet()) {
+                String key = String.valueOf(entry.getKey());
+                Integer value = ((Number) entry.getValue()).intValue();
+                convertedMap.put(key, value);
+            }
+        }
+        response.setSelectedAnswers(convertedMap);
 
         return response;
     }

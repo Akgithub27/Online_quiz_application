@@ -1,6 +1,8 @@
 package com.online_quiz.controller;
 
 import com.online_quiz.dto.*;
+import com.online_quiz.entity.Question;
+import com.online_quiz.repository.QuestionRepository;
 import com.online_quiz.repository.UserRepository;
 import com.online_quiz.service.QuestionService;
 import com.online_quiz.service.QuizAttemptService;
@@ -27,6 +29,7 @@ public class ParticipantController {
     private final QuestionService questionService;
     private final QuizAttemptService quizAttemptService;
     private final UserRepository userRepository;
+    private final QuestionRepository questionRepository;
 
     @GetMapping("/quizzes")
     @PreAuthorize("hasRole('PARTICIPANT')")
@@ -39,16 +42,20 @@ public class ParticipantController {
     @GetMapping("/quiz/{quizId}")
     @PreAuthorize("hasRole('PARTICIPANT')")
     @Operation(summary = "Get quiz details", description = "Get quiz details with questions")
-    public ResponseEntity<QuizWithQuestionsResponse> getQuizDetails(@PathVariable Long quizId) {
+    public ResponseEntity<ParticipantQuizWithQuestionsResponse> getQuizDetails(@PathVariable Long quizId) {
         QuizResponse quiz = quizService.getQuizById(quizId);
-        List<QuestionResponse> questions = questionService.getQuestionsByQuizId(quizId);
+        com.online_quiz.entity.Quiz quizEntity = new com.online_quiz.entity.Quiz();
+        quizEntity.setId(quizId);
+        List<Question> questions = questionRepository.findByQuizOrderByQuestionOrderAsc(quizEntity);
 
-        QuizWithQuestionsResponse response = new QuizWithQuestionsResponse();
+        ParticipantQuizWithQuestionsResponse response = new ParticipantQuizWithQuestionsResponse();
         response.setId(quiz.getId());
         response.setTitle(quiz.getTitle());
         response.setDescription(quiz.getDescription());
         response.setTimeLimit(quiz.getTimeLimit());
-        response.setQuestions(questions);
+        response.setQuestions(questions.stream()
+                .map(ParticipantQuestionResponse::fromEntity)
+                .toList());
 
         return ResponseEntity.ok(response);
     }
