@@ -1,5 +1,8 @@
 package com.online_quiz.exception;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -83,11 +86,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
 
+    @Data
+    @NoArgsConstructor
     public static class ErrorResponse {
-        public int status;
-        public String message;
-        public LocalDateTime timestamp;
-        public Map<String, String> errors;
+        private int status;
+        private String message;
+        private LocalDateTime timestamp;
+        private Map<String, String> errors;
 
         public ErrorResponse(int status, String message, LocalDateTime timestamp) {
             this.status = status;

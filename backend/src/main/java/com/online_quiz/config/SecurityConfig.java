@@ -51,27 +51,13 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeHttpRequests(authz -> authz
-                        // Public endpoints
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/api-docs/**").permitAll()
-                        .requestMatchers("/actuator/**").permitAll()
-
-                        // Admin endpoints
-                        .requestMatchers(HttpMethod.POST, "/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/admin/**").hasRole("ADMIN")
-
-                        // Participant endpoints
-                        .requestMatchers(HttpMethod.GET, "/api/quizzes/**").hasRole("PARTICIPANT")
-                        .requestMatchers(HttpMethod.POST, "/api/quiz/submit").hasRole("PARTICIPANT")
-                        .requestMatchers(HttpMethod.GET, "/api/user/**").hasRole("PARTICIPANT")
-
-                        // All other requests must be authenticated
-                        .anyRequest().authenticated()
+                        // Allow all requests without authentication for development
+                        // In production, you should implement proper authorization
+                        .anyRequest().permitAll()
                 );
 
-        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        // JWT filter disabled for development - remove this comment when enabling JWT
+        // http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

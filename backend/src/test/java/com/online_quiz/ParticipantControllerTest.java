@@ -3,7 +3,9 @@ package com.online_quiz;
 import com.online_quiz.entity.Quiz;
 import com.online_quiz.entity.User;
 import com.online_quiz.repository.QuizRepository;
+import com.online_quiz.repository.QuizAttemptRepository;
 import com.online_quiz.repository.UserRepository;
+import com.online_quiz.service.QuizAttemptService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,9 +16,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -32,7 +36,13 @@ public class ParticipantControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
+    private QuizAttemptService quizAttemptService;
+
+    @MockBean
     private QuizRepository quizRepository;
+
+    @MockBean
+    private QuizAttemptRepository quizAttemptRepository;
 
     @MockBean
     private UserRepository userRepository;
@@ -60,11 +70,13 @@ public class ParticipantControllerTest {
         quiz.setTimeLimit(60);
         quiz.setIsPublished(true);
         quiz.setCreatedBy(adminUser);
-        quiz.setQuestions(new ArrayList<>());
+        quiz.setQuestions(new HashSet<>());
     }
 
     @Test
     public void testGetPublishedQuizzes() throws Exception {
+        when(quizRepository.findByIsPublishedTrue()).thenReturn(Arrays.asList(quiz));
+
         mockMvc.perform(get("/api/quizzes")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
@@ -100,6 +112,8 @@ public class ParticipantControllerTest {
 
     @Test
     public void testGetUserHistory() throws Exception {
+        when(quizAttemptService.getUserHistory(anyLong())).thenReturn(new java.util.ArrayList<>());
+
         mockMvc.perform(get("/api/user/history")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
