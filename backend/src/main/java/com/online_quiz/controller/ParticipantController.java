@@ -2,6 +2,8 @@ package com.online_quiz.controller;
 
 import com.online_quiz.dto.*;
 import com.online_quiz.entity.Question;
+import com.online_quiz.exception.BadRequestException;
+import com.online_quiz.exception.ResourceNotFoundException;
 import com.online_quiz.repository.QuestionRepository;
 import com.online_quiz.repository.UserRepository;
 import com.online_quiz.service.QuestionService;
@@ -11,6 +13,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,6 +26,7 @@ import java.util.List;
 @RequestMapping("/api")
 @RequiredArgsConstructor
 @Tag(name = "Participant", description = "Participant quiz endpoints")
+@Slf4j
 public class ParticipantController {
 
     private final QuizService quizService;
@@ -90,11 +94,19 @@ public class ParticipantController {
 
     private Long extractUserId(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
-            throw new RuntimeException("User is not authenticated");
+            log.warn("User authentication failed");
+            throw new BadRequestException("User is not authenticated");
         }
         String email = authentication.getName();
+        if (email == null || email.trim().isEmpty()) {
+            log.warn("Email not found in authentication");
+            throw new BadRequestException("Email not found in authentication");
+        }
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found with email: " + email))
+                .orElseThrow(() -> {
+                    log.warn("User not found with email: {}", email);
+                    return new ResourceNotFoundException("User not found with email: " + email);
+                })
                 .getId();
     }
 }

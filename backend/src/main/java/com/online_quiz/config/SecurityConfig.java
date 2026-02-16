@@ -1,10 +1,13 @@
 package com.online_quiz.config;
 
+import com.online_quiz.security.CustomUserDetailsService;
 import com.online_quiz.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -25,10 +28,19 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CorsConfigurationSource corsConfigurationSource;
+    private final CustomUserDetailsService customUserDetailsService;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(customUserDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder());
+        return authProvider;
     }
 
     @Bean
@@ -51,14 +63,18 @@ public class SecurityConfig {
             .authorizeHttpRequests(authz -> authz
                 // Publicly accessible endpoints
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/health/**").permitAll()
+                .requestMatchers("/api/db-check").permitAll()
+                .requestMatchers("/api/ready").permitAll()
+                .requestMatchers("/api/alive").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/api-docs/**").permitAll()
                 .requestMatchers("/actuator/**").permitAll()
                 // All other requests require authentication
-                .anyRequest().permitAll() 
+                .anyRequest().authenticated() 
             );
 
-        // Re-enable this when you want to enforce JWT on the "anyRequest" endpoints
-        // http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        // Add JWT filter before UsernamePasswordAuthenticationFilter
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

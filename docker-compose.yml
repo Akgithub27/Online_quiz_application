@@ -22,9 +22,9 @@ services:
       dockerfile: Dockerfile
     container_name: quiz_backend
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/quiz_db
+      SPRING_DATASOURCE_URL: jdbc:mysql://switchback.proxy.rlwy.net:19205/railway
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: root_password
+      SPRING_DATASOURCE_PASSWORD: UWAJtVPuysnmzNHdXkvcobkVRYKuuVAc
       JWT_SECRET: your_super_secret_jwt_key_min_32_chars_long
       JWT_EXPIRATION: 86400000
     ports:

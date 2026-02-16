@@ -1,7 +1,7 @@
 package com.online_quiz;
 
+import com.online_quiz.dto.ErrorResponse;
 import com.online_quiz.exception.GlobalExceptionHandler;
-import com.online_quiz.exception.GlobalExceptionHandler.ErrorResponse;
 import com.online_quiz.exception.ResourceNotFoundException;
 import com.online_quiz.exception.UnauthorizedException;
 import org.junit.jupiter.api.BeforeEach;
